@@ -21,7 +21,7 @@ Right now it only pull Integrity Monitoring and Intrusion Prevention rules (that
 
 * Download and install the last [Python SDK](https://automation.deepsecurity.trendmicro.com/article/11_3/python?platform=on-premise)
 * Generate an Api key with at least view permission at Intrusion prevention, Integrity monitoring and Computers, [tutorial](https://help.deepsecurity.trendmicro.com/api-key.html).
-* Fill ds.conf with your api route (if you use the SaaS solutions)
+* Fill ds.conf with your api route and key
 
 
 ### Usage
@@ -30,7 +30,7 @@ Just:
   ```python 
     python dsattck.py
   ```
-If you filled the config file correctly, everything should work! This will generate 2 json files, enviroment and applied rules, an matrix with ALL rules and a matrix will the applied rules only respectively, you can submit this files at [ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/enterprise/)
+If you filled the config file correctly, everything should work! This will generate 2 json files, enviroment and applied rules, an matrix with ALL rules and a matrix with the applied rules only, you can submit this files at [ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/enterprise/)
 
 
 
