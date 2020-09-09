@@ -20,7 +20,7 @@ class DSAttck:
     def __init__(self):
         self.attck_navigator =  {
             "name": "Deep Security ATT&CK",
-            "version": "2.1",
+            "version": "3.0",
             "domain": "mitre-enterprise",
             "description": "An generated Deep Security ATT&CK matrix",
             "filters": {
@@ -28,13 +28,17 @@ class DSAttck:
                     "act"
                 ],
                 "platforms": [
-                    "windows",
-                    "linux",
-                    "mac"
+                    "Windows",
+                    "Linux",
+                    "macOS"
                 ]
             },
             "sorting": 0,
-            "viewMode": 0,
+            "layout": {
+                "layout": "side",
+                "showID": False,
+                "showName": True
+            },
             "hideDisabled": False,
             "techniques": [],
             "gradient": {
@@ -50,7 +54,8 @@ class DSAttck:
             "metadata": [],
             "showTaticRowBackground": False,
             "tacticRowBackground": "#dddddd",
-            "selectTechniquesAcrossTactics": True
+            "selectTechniquesAcrossTactics": True,
+            "selectSubtechniquesWithParent": False
         }
 
         self.used_ruleset = {}
