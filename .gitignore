@@ -1,6 +1,10 @@
 __pycache__/
+.vscode/
 attckenv/
+sdk/
 *.pyc
 vendor/*
 *.json
-*.conf
+*.zip
+
+ds.conf

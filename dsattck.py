@@ -18,6 +18,13 @@ if not sys.warnoptions:
 
 class DSAttck:
     def __init__(self):
+        self.INTEGRIY_MONITORING = 'Integriy Monitoring'
+        self.INTRUSION_PREVENSION = 'Intrusion Prevention'
+        self.valid_modules = {
+            self.INTEGRIY_MONITORING: True ,
+            self.INTRUSION_PREVENSION: True
+        }
+
         self.attck_navigator =  {
             "name": "Deep Security ATT&CK",
             "version": "3.0",
@@ -58,11 +65,12 @@ class DSAttck:
             "selectSubtechniquesWithParent": False
         }
 
-        self.used_ruleset = {}
         self.used_attck_rules = {}
 
     def process_rules(self,rules, module_name, update = True):
-        self.used_attck_rules = {}
+        if module_name not in self.valid_modules:
+            raise Exception("Invalid module {}".format(module_name))
+
 
         if not update:
             self.attck_navigator['techniques'].clear()
@@ -77,7 +85,8 @@ class DSAttck:
             rule_match['rules'] = search.group()[len('ATT&CK')+2:-1].split(',')
             rule_match['description'] = module_rule.description
             rule_match['module_name'] = module_name
-            self.used_attck_rules[module_rule.id] = rule_match
+            self.used_attck_rules.setdefault(module_name, {})
+            self.used_attck_rules[module_name][module_rule.id] = rule_match
 
             for techID in rule_match['rules']:
                 self.attck_navigator['techniques'].append({
@@ -90,26 +99,38 @@ class DSAttck:
         return self.used_attck_rules
     
     def get_used_rules(self,computers, to_json=True):
+        
+        integrity_monitoring_rules = self.used_attck_rules.get(self.INTEGRIY_MONITORING, {})
+        intrusion_prevention_rules = self.used_attck_rules.get(self.INTRUSION_PREVENSION, {})
         module_id_rules = {}
+        matched_rules = {} # Avoid duplicates
+
         for c in computers:
             if c.integrity_monitoring.rule_ids is not None:
                 for comp_rule in c.integrity_monitoring.rule_ids:
-                    if comp_rule not in module_id_rules and comp_rule in self.used_attck_rules:
-                        module_id_rules[comp_rule] = True
+                    if comp_rule not in matched_rule and comp_rule in integrity_monitoring_rules:
+                        module_id_rules.setdefault(self.INTEGRIY_MONITORING, [])
+                        module_id_rules[self.INTEGRIY_MONITORING].append(comp_rule)
+                        matched_rules[comp_rule] = None
 
             if c.intrusion_prevention.rule_ids is not None:
                 for comp_rule in c.intrusion_prevention.rule_ids:
-                    if comp_rule not in module_id_rules and comp_rule in self.used_attck_rules:
-                        module_id_rules[comp_rule] = True
+                    if comp_rule not in matched_rules and comp_rule in intrusion_prevention_rules:
+                        module_id_rules.setdefault(self.INTRUSION_PREVENSION, [])
+                        module_id_rules[self.INTRUSION_PREVENSION].append(comp_rule)
+                        matched_rules[comp_rule] = None
 
-        for valid_rule in module_id_rules.keys():
-            for rule in self.used_attck_rules[valid_rule]['rules']:
-                self.attck_navigator['techniques'].append({
-                    "techniqueID": rule,
-                    "comment": "{} Rule applied by {}".format(self.used_attck_rules[valid_rule]['description'], self.used_attck_rules[valid_rule]['module_name']),
-                    "color": "#31a354",
-                    "enabled": True
-                })
+
+        for module_name, applied_rules in module_id_rules.items():
+            for valid_rule in applied_rules:
+                for rule in self.used_attck_rules[module_name][valid_rule]['rules']:
+                    description = self.used_attck_rules[module_name][valid_rule]['description']
+                    self.attck_navigator['techniques'].append({
+                        "techniqueID": rule,
+                        "comment": "{} Rule applied by {}".format(description, module_name),
+                        "color": "#31a354",
+                        "enabled": True
+                    })
 
 
         raw_json = json.dumps(self.attck_navigator, indent=4) if to_json else self.attck_navigator
@@ -126,6 +147,8 @@ class DSAttck:
 
 
 CONF_NAME = "ds.conf"
+ENV_FILE = "environment.json"
+APPLIED_FILE = "applied_rules.json"
 
 
 if __name__ == '__main__':
@@ -167,8 +190,8 @@ if __name__ == '__main__':
 
     print("Processing rules...")
 
-    attck_ds.process_rules(ips_rules, module_name = "Integrity Monitor")
-    attck_ds.process_rules(im_rules,  module_name = "Intrusion Prevension")
+    attck_ds.process_rules(ips_rules, module_name = attck_ds.INTRUSION_PREVENSION)
+    attck_ds.process_rules(im_rules,  module_name = attck_ds.INTEGRIY_MONITORING)
 
     print("Requesting all computers...")
     computers = api_client.request_computers()
