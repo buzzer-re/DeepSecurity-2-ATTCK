@@ -3,4 +3,4 @@ attckenv/
 *.pyc
 vendor/*
 *.json
-
+*.conf
