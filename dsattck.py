@@ -90,7 +90,7 @@ class DSAttck:
 
             for techID in rule_match['rules']:
                 self.attck_navigator['techniques'].append({
-                    "techniqueID": techID,
+                    "techniqueID": techID.strip(),
                     "comment": "{} Rule applied by {}".format(rule_match['description'], module_name),
                     "color": "#31a354",
                     "enabled": True
@@ -108,7 +108,7 @@ class DSAttck:
         for c in computers:
             if c.integrity_monitoring.rule_ids is not None:
                 for comp_rule in c.integrity_monitoring.rule_ids:
-                    if comp_rule not in matched_rule and comp_rule in integrity_monitoring_rules:
+                    if comp_rule not in matched_rules and comp_rule in integrity_monitoring_rules:
                         module_id_rules.setdefault(self.INTEGRIY_MONITORING, [])
                         module_id_rules[self.INTEGRIY_MONITORING].append(comp_rule)
                         matched_rules[comp_rule] = None
@@ -201,11 +201,11 @@ if __name__ == '__main__':
     print("Associating rules...")
     used_rules = attck_ds.get_used_rules(computers, to_json=True)
 
-    with open('enviroment.json', 'w') as env_attck:
+    with open(ENV_FILE, 'w') as env_attck:
         env_attck.write(all_rules)
     
-    with open('applied_attck.json', 'w') as used_attck:
+    with open(APPLIED_FILE, 'w') as used_attck:
         used_attck.write(used_rules)
 
 
-    print("All rules can be found in enviroment.json file and used rules in applied_attck.json")
+    print("All rules can be found in {} file and used rules in {}".format(ENV_FILE, APPLIED_FILE))
